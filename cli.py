@@ -1,5 +1,6 @@
 #!/Applications/anaconda/anaconda3/bin/python -u
 import click
+import json
 import logging
 import sys
 import threading
@@ -71,7 +72,8 @@ def main(config, local_path, colorize, level, concurrent_downloads):
     def update_callback(result):
         channel = result["channel"]
         threshold = Config.get_days_old(channel)
-        print(rss.get_rss(channel, result["filename"], threshold))
+        with open(result["filename"]) as fd:
+            print(rss.get_rss(channel, json.load(fd), threshold))
 
     downloader = threading.Thread(
         target=Downloader.run,
