@@ -47,16 +47,13 @@ def get_rss(channel_name, channeldata_fn, threshold_days):
                 "link": package.get("doc_url"),  # URI - project or project docs
                 "comments": package.get("dev_url"),  # URI
                 "guid": package.get("source_url"),  # URI - download link
-                "timestamp": package["timestamp"],  # used for sorting
                 "pubDate": iso822(package["timestamp"]),
                 "source": package.get("home"),  # URI
             }
             for name, package in [(p["name"], p["details"]) for p in packages]
         ]
-        # Sort and prepare the items for rendering.
-        items.sort(key=lambda x: x["timestamp"])
+        # Prepare the items for rendering by removing falsy values.
         for item in items:
-            del item["timestamp"]
             empty_fields = [k for k, v in item.items() if not v]
             for k in empty_fields:
                 del item[k]
