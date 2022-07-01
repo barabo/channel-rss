@@ -1,4 +1,3 @@
-import json
 import time
 from xml.dom.minidom import parseString
 from dicttoxml import dicttoxml
@@ -16,7 +15,7 @@ def get_recent_packages(channeldata, threshold_days):
 
     def find_recent_packages():
         for package in all_packages():
-            if package["details"]["timestamp"] > threshold:
+            if package["details"].get("timestamp", threshold) > threshold:
                 yield package
 
     return sorted(
@@ -26,53 +25,66 @@ def get_recent_packages(channeldata, threshold_days):
     )
 
 
-def get_rss(channel_name, channeldata_fn, threshold_days):
-    with open(channeldata_fn, "r") as fd:
-        data = json.load(fd)
+def iso822(timestamp):
+    return time.strftime("%a, %d %b %Y %T GMT", time.gmtime(timestamp))
 
-        packages = get_recent_packages(data, threshold_days)
-        iso822 = lambda ts: time.strftime("%a, %d %b %Y %T GMT", time.gmtime(ts))
-        channel = {
-            "title": f"anaconda.org/{channel_name}",
-            "link": f"https://conda.anaconda.org/{channel_name}",
-            "description": f"An anaconda.org community with {len(packages)} recent package updates.",
-            "pubDate": iso822(time.time()),
-            "lastBuildDate": iso822(time.time()),
+
+def get_channel(channel_name, packages, threshold_days):
+    return {
+        "title": f"anaconda.org/{channel_name}",
+        "link": f"https://conda.anaconda.org/{channel_name}",
+        "description": f"An anaconda.org community with {len(packages)} package updates in the past {threshold_days} days.",
+        "pubDate": iso822(time.time()),
+        "lastBuildDate": iso822(time.time()),
+    }
+
+
+def get_title(name, version, subdirs):
+    return f"{name} {version} [{', '.join(sorted({x for x in subdirs}))}]"
+
+
+def get_items(packages):
+    items = []
+    for name, package in [(p["name"], p["details"]) for p in packages]:
+        __ = lambda x: package.get(x)
+        coalesce = lambda *args: [package[x] for x in args if __(x)][0]
+        item = {
+            # Example: "7zip 19.00 [osx-64, win-64]"
+            "title": get_title(name, __("version"), __("subdirs")),
+            "description": coalesce("description", "summary"),
+            "link": __("doc_url"),  # URI - project or project docs
+            "comments": __("dev_url"),  # URI
+            "guid": __("source_url"),  # URI - download link
+            "pubDate": iso822(__("timestamp")),
+            "source": __("home"),  # URI
         }
-        items = [
-            {
-                # Example: "7zip 19.00 [osx-64, win-64]"
-                "title": f"{name} {package['version']} [{', '.join(sorted(package['subdirs']))}]",
-                "description": package.get("description", package.get("summary")),
-                "link": package.get("doc_url"),  # URI - project or project docs
-                "comments": package.get("dev_url"),  # URI
-                "guid": package.get("source_url"),  # URI - download link
-                "pubDate": iso822(package["timestamp"]),
-                "source": package.get("home"),  # URI
-            }
-            for name, package in [(p["name"], p["details"]) for p in packages]
-        ]
-        # Prepare the items for rendering by removing falsy values.
-        for item in items:
-            empty_fields = [k for k, v in item.items() if not v]
-            for k in empty_fields:
-                del item[k]
+        empty_fields = [k for k, v in item.items() if not v]
+        for k in empty_fields:
+            del item[k]
+        items.append(item)
+    return items
 
-        rss = dicttoxml(
+
+def get_rss(channel_name, channeldata, threshold_days):
+    packages = get_recent_packages(channeldata, threshold_days)
+    rss = parseString(
+        dicttoxml(
             {
-                "channel": channel,
-                "item": items,
+                "channel": get_channel(channel_name, packages, threshold_days),
+                "item": get_items(packages),
             },
             custom_root="rss",
             attr_type=False,
         )
-
-        return (
-            parseString(rss)
-            .toprettyxml(indent="  ")
-            .replace("<rss>", '<rss version="2.0">')
-        )
+    )
+    rss.firstChild.setAttribute("version", "2.0")
+    return rss.toprettyxml(indent="    ")
 
 
 if __name__ == "__main__":
-    print(get_rss("conda-forge", "./cloned/conda-forge/channeldata.json", 0.1))
+    import sys
+    import json
+
+    channel, channeldata_fn, threshold_days = sys.argv[1:]
+    with channeldata_fn as fd:
+        print(get_rss(channel, json.load(fd), int(threshold_days)))
