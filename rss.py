@@ -30,9 +30,7 @@ def get_rss(channel_name, channeldata_fn, threshold_days):
     with open(channeldata_fn, "r") as fd:
         data = json.load(fd)
 
-        packages = get_recent_packages(
-            data, threshold_days
-        )  # Tue, 10 Jun 2003 09:41:01 GMT
+        packages = get_recent_packages(data, threshold_days)
         iso822 = lambda ts: time.strftime("%a, %d %b %Y %T GMT", time.gmtime(ts))
         channel = {
             "title": f"anaconda.org/{channel_name}",
