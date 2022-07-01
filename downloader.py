@@ -93,13 +93,15 @@ class Downloader:
                 shutil.copyfileobj(upstream.raw, local, length=2**24)  # 16MB
 
             # Quit early if the downloaded file is not new or is not needed.
-            if exists(channeldata) and exists(compressed) and filecmp.cmp(
-                compressed, new_download, shallow=False
+            if (
+                exists(channeldata)
+                and exists(compressed)
+                and filecmp.cmp(compressed, new_download, shallow=False)
             ):
                 os.unlink(new_download)
                 return
 
-            # Update repodata.json!
+            # Update channeldata!
             result["inflate_start"] = time.time()
             with gzip.open(new_download, "rt") as src, open(inflated, "w") as dest:
                 shutil.copyfileobj(src, dest, length=2**24)  # 16MB
@@ -108,6 +110,7 @@ class Downloader:
             # Replace the old channeldata with the new.
             shutil.move(inflated, channeldata)
             result["updated"] = time.time()
+            result["filename"] = channeldata
 
     @classmethod
     def download(cls, channel, scheduler_inbox, download_gate):
