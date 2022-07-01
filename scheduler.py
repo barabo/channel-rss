@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 class Scheduler(threading.Thread):
     allowed_schedule_drift = 5  # seconds / interval (for schedule fuzzing)
 
-    def __init__(self, channel):
+    def __init__(self, channel, update_callback=None):
         super().__init__(
             target=self.run,
             name=f"Scheduler({channel})",
@@ -25,6 +25,7 @@ class Scheduler(threading.Thread):
         self.channel = channel
         self.previous_downloads = collections.deque([])
         self.last_observed = time.time()
+        self._update_callback = update_callback
         log.debug(f"Starting scheduler for {channel}")
         self.start()
 
@@ -129,11 +130,18 @@ class Scheduler(threading.Thread):
 
                     result = download_status.get(timeout=cadence * 5)
 
+                    result["channel"] = self.channel
                     result["download_id"] = download_id
                     log.info(f"{download_id} result available")
                     if result.get("updated"):
                         log.info(f"{download_id} updated")
-                        # TODO: schedule an index operation on the updated file
+                        if self._update_callback:
+                            threading.Thread(
+                                name=f"Updater({self.channel})",
+                                target=self._update_callback,
+                                args=(result,),
+                                daemon=True,
+                            ).start()
 
                     # Update history.
                     self.previous_downloads.appendleft(result)
