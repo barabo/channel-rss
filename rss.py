@@ -50,7 +50,6 @@ def get_rss(channel_name, channeldata_fn, threshold_days):
                 "timestamp": package["timestamp"],  # used for sorting
                 "pubDate": iso822(package["timestamp"]),
                 "source": package.get("home"),  # URI
-                "##other": package.get("license"),  # extensibility object
             }
             for name, package in [(p["name"], p["details"]) for p in packages]
         ]
