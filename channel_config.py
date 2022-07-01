@@ -9,13 +9,16 @@ Example channels.json
 {
     "channels": {
         "anaconda": {
-            "cadence": 1200
+            "cadence": 1200,
+            "days_old": 30
         },
         "bioconda": {
-            "cadence": 300
+            "cadence": 300,
+            "days_old": 18
         },
         "conda-forge": {
-            "cadence": 600
+            "cadence": 600,
+            "days_old": 14
         }
     }
 }
@@ -47,6 +50,12 @@ class Config:
         config = cls.get_channels().get(channel)
         if config:
             return config.get("cadence", -1)
+
+    @classmethod
+    def get_days_old(cls, channel):
+        config = cls.get_channels().get(channel)
+        if config:
+            return config.get("days_old", -1)
 
     @classmethod
     def get_channels(cls):
