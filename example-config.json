@@ -1,0 +1,16 @@
+{
+    "channels": {
+        "anaconda": {
+            "cadence": 1200,
+            "days_old": 30
+        },
+        "bioconda": {
+            "cadence": 300,
+            "days_old": 18
+        },
+        "conda-forge": {
+            "cadence": 600,
+            "days_old": 14
+        }
+    }
+}
