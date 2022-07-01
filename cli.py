@@ -1,5 +1,4 @@
 #!/Applications/anaconda/anaconda3/bin/python -u
-
 import click
 import logging
 import sys
@@ -8,6 +7,7 @@ import time
 
 from channel_config import Config
 from downloader import Downloader
+import rss
 from scheduler import Scheduler
 
 log = logging.getLogger("cli.py")
@@ -63,12 +63,15 @@ def init_logging(level="INFO", colorize=True):
     type=click.IntRange(1, 1000),
     help="The maximum allowed number of concurrent downloads.",
 )
-
-
 def main(config, local_path, colorize, level, concurrent_downloads):
     init_logging(level, colorize)
     Config.use_file(config)
     Config.set_local_folder(local_path)
+
+    def update_callback(result):
+        channel = result["channel"]
+        threshold = Config.get_days_old(channel)
+        print(rss.get_rss(channel, result["filename"], threshold))
 
     downloader = threading.Thread(
         target=Downloader.run,
@@ -84,7 +87,7 @@ def main(config, local_path, colorize, level, concurrent_downloads):
             return 1
         for channel in Config.get_channels():
             if channel not in schedulers:
-                schedulers[channel] = Scheduler(channel)
+                schedulers[channel] = Scheduler(channel, update_callback)
             schedulers[channel].observed()
 
 
