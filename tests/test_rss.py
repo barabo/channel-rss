@@ -5,6 +5,7 @@ import time
 sys.path[0] = sys.path[0].rsplit("/", 1)[0]
 
 import rss
+
 DAY = 24 * 60 * 60
 CHANNELDATA = {
     "channeldata_version": 1,
@@ -43,16 +44,36 @@ CHANNELDATA = {
 
 class rssTest(unittest.TestCase):
     def setUp(self) -> None:
-        super().setUp()
         self.channeldata = CHANNELDATA
+        rss.time.time = lambda: 1656741161.774336
+        self.maxDiff = None
+
+    def tearDown(self) -> None:
+        rss.time.time = time.time
 
     def testGetRecentPackages(self):
         actual = rss.get_recent_packages(self.channeldata, 2)
         expected = [{"example1": self.channeldata["packages"]["example1"]}]
         self.assertDictEqual(actual[0], expected[0])
 
+    def testGetChannel(self):
+        packages = rss.get_recent_packages(self.channeldata, 2)
+        actual = rss.get_channel("example", packages, 2)
+        expected = {
+            "title": "anaconda.org/example",
+            "link": "https://conda.anaconda.org/example",
+            "description": "An anaconda.org community with 1 package updates in the past 2 days.",
+            "pubDate": rss.iso822(time.time()),
+            "lastBuildDate": rss.iso822(time.time()),
+        }
+        self.assertDictEqual(actual, expected)
+
+    def testGetTitle(self):
+        actual = rss.get_title("example2", "213", ["win-32", "linux-s390x"])
+        expected = "example2 213 [linux-s390x, win-32]"
+        self.assertEqual(actual, expected)
+
     def testIso822(self):
-        print(":HI")
         self.assertEqual(rss.iso822(0), "Thu, 01 Jan 1970 00:00:00 GMT")
         self.assertEqual(rss.iso822(1656717698.601216), "Fri, 01 Jul 2022 23:21:38 GMT")
 
