@@ -81,7 +81,7 @@ def get_rss(channel_name, channeldata, threshold_days):
     return rss.toprettyxml(indent="    ")
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     import sys
     import json
 
