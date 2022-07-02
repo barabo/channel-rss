@@ -8,4 +8,3 @@ coverage: .coverage
 
 report: coverage
 	coverage html && open htmlcov/index.html
-
