@@ -9,18 +9,18 @@ def get_recent_packages(channeldata, threshold_days):
 
     def all_packages():
         for name, package in channeldata.get("packages", {}).items():
-            yield {"name": name, "details": package}
+            yield {name: package}
         for name, package in channeldata.get("packages.conda", {}).items():
-            yield {"name": name, "details": package}
+            yield {name: package}
 
     def find_recent_packages():
         for package in all_packages():
-            if package["details"].get("timestamp", threshold) > threshold:
+            if tuple(package.values())[0].get("timestamp", threshold) > threshold:
                 yield package
 
     return sorted(
         find_recent_packages(),
-        key=lambda x: x["details"]["timestamp"],
+        key=lambda x: tuple(x.values())[0]["timestamp"],
         reverse=True,
     )
 
@@ -45,7 +45,7 @@ def get_title(name, version, subdirs):
 
 def get_items(packages):
     items = []
-    for name, package in [(p["name"], p["details"]) for p in packages]:
+    for name, package in [tuple(p.items())[0] for p in packages]:
         __ = lambda x: package.get(x)
         coalesce = lambda *args: [package[x] for x in args if __(x)][0]
         item = {
