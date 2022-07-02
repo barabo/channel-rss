@@ -1,4 +1,4 @@
-.PHONY: tests
+.PHONY: tests clean
 
 tests:
 	pytest
@@ -8,3 +8,6 @@ coverage: .coverage
 
 report: coverage
 	coverage html && open htmlcov/index.html
+
+clean:
+	black *.py tests/*.py
