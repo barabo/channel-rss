@@ -13,7 +13,7 @@ from scheduler import Scheduler
 
 log = logging.getLogger("cli.py")
 
-REPO_URL = "https://github.com/barabo/upstream-downloader"
+REPO_URL = "https://github.com/barabo/channel-rss"
 
 
 def init_logging(level="INFO", colorize=True):
