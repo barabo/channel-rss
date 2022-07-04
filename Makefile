@@ -1,7 +1,7 @@
 .PHONY: tests clean
 
 tests:
-	pytest
+	python3 -m pytest -W ignore::DeprecationWarning
 
 coverage: .coverage
 	coverage run tests/test_rss.py
