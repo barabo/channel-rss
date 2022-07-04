@@ -1,3 +1,7 @@
+import logging
+
+logging.getLogger("dicttoxml").setLevel(logging.WARNING)
+
 import time
 from xml.dom.minidom import parseString
 from dicttoxml import dicttoxml
@@ -44,14 +48,22 @@ def get_title(name, version, subdirs):
 
 
 def get_items(packages):
+
     items = []
     for name, package in [tuple(p.items())[0] for p in packages]:
         __ = lambda x: package.get(x)
-        coalesce = lambda *args: [package[x] for x in args if __(x)][0]
+
+        def coalesce(*args, default="No description."):
+            for arg in [a for a in args if __(a)]:
+                return package[arg]
+            return default
+
         item = {
             # Example: "7zip 19.00 [osx-64, win-64]"
             "title": get_title(name, __("version"), __("subdirs")),
-            "description": coalesce("description", "summary"),
+            "description": coalesce(
+                "description", "summary", default="No description."
+            ),
             "link": __("doc_url"),  # URI - project or project docs
             "comments": __("dev_url"),  # URI
             "guid": __("source_url"),  # URI - download link
