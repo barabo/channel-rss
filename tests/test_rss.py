@@ -1,8 +1,5 @@
 import unittest
-import sys
 import time
-
-sys.path[0] = sys.path[0].rsplit("/", 1)[0]
 
 import rss
 
