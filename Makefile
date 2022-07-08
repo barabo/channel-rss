@@ -2,7 +2,7 @@ PYTEST_OPTS := -m pytest -W ignore::DeprecationWarning
 
 .PHONY: tests clean
 
-tests:
+tests: clean
 	python3 ${PYTEST_OPTS}
 
 coverage: .coverage
