@@ -1,10 +1,12 @@
+PYTEST_OPTS := -m pytest -W ignore::DeprecationWarning
+
 .PHONY: tests clean
 
 tests:
-	python3 -m pytest -W ignore::DeprecationWarning
+	python3 ${PYTEST_OPTS}
 
 coverage: .coverage
-	coverage run tests/test_rss.py
+	coverage run ${PYTEST_OPTS} tests/test_rss.py
 
 report: coverage
 	coverage html && open htmlcov/index.html
