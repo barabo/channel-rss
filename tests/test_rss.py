@@ -131,8 +131,6 @@ class rssTest(unittest.TestCase):
         <description>An anaconda.org community with 1 package updates in the past 2 days.</description>
         <pubDate>Sat, 02 Jul 2022 05:52:41 GMT</pubDate>
         <lastBuildDate>Sat, 02 Jul 2022 05:52:41 GMT</lastBuildDate>
-    </channel>
-    <item>
         <item>
             <title>example1 123 [win-32, win-64]</title>
             <description>Long description.</description>
@@ -141,7 +139,7 @@ class rssTest(unittest.TestCase):
             <pubDate>Fri, 01 Jul 2022 05:52:41 GMT</pubDate>
             <source>http://example1.org/</source>
         </item>
-    </item>
+    </channel>
 </rss>
 """
         self.assertEqual(actual, expected)
