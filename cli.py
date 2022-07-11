@@ -1,4 +1,4 @@
-#!/Applications/anaconda/anaconda3/bin/python -u
+#!/usr/bin/env python3 -u
 import click
 import json
 import logging
