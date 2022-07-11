@@ -1,10 +1,5 @@
-import logging
-
-logging.getLogger("dicttoxml").setLevel(logging.WARNING)
-
 import time
-from xml.dom.minidom import parseString
-from dicttoxml import dicttoxml
+from xml.dom.minidom import getDOMImplementation
 
 
 def get_recent_packages(channeldata, threshold_days):
@@ -78,19 +73,28 @@ def get_items(packages):
 
 
 def get_rss(channel_name, channeldata, threshold_days):
+    newdoc = getDOMImplementation().createDocument(None, "rss", None)
+
+    def append_strings(node, strings):
+        for key, value in strings.items():
+            key = newdoc.createElement(key)
+            key.appendChild(newdoc.createTextNode(str(value)))
+            node.appendChild(key)
+
     packages = get_recent_packages(channeldata, threshold_days)
-    rss = parseString(
-        dicttoxml(
-            {
-                "channel": get_channel(channel_name, packages, threshold_days),
-                "item": get_items(packages),
-            },
-            custom_root="rss",
-            attr_type=False,
-        )
-    )
-    rss.firstChild.setAttribute("version", "2.0")
-    return rss.toprettyxml(indent="    ")
+
+    channel = newdoc.createElement("channel")
+    append_strings(channel, get_channel(channel_name, packages, threshold_days))
+
+    for package in get_items(packages):
+        item = newdoc.createElement("item")
+        append_strings(item, package)
+        channel.appendChild(item)
+
+    rss = newdoc.documentElement
+    rss.setAttribute("version", "2.0")
+    rss.appendChild(channel)
+    return newdoc.toprettyxml(indent="    ")
 
 
 if __name__ == "__main__":  # pragma: no cover
@@ -98,5 +102,5 @@ if __name__ == "__main__":  # pragma: no cover
     import json
 
     channel, channeldata_fn, threshold_days = sys.argv[1:]
-    with channeldata_fn as fd:
+    with open(channeldata_fn) as fd:
         print(get_rss(channel, json.load(fd), int(threshold_days)))
