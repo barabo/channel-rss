@@ -16,9 +16,7 @@ class Scheduler(threading.Thread):
 
     def __init__(self, channel, update_callback=None):
         super().__init__(
-            target=self.run,
-            name=f"Scheduler({channel})",
-            daemon=True,
+            target=self.run, name=f"Scheduler({channel})", daemon=True,
         )
         log.info(f"Scheduler created for {channel}")
         self.attempt = 0
@@ -120,9 +118,7 @@ class Scheduler(threading.Thread):
                 download_status = queue.Queue(1)
                 self.attempt += 1
                 upstream.Downloader.schedule(
-                    self.channel,
-                    time.time() + should_start_in,
-                    download_status,
+                    self.channel, time.time() + should_start_in, download_status,
                 )
                 try:
                     download_id = f"download({self.attempt})"
