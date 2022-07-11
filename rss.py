@@ -56,9 +56,7 @@ def get_items(packages):
         item = {
             # Example: "7zip 19.00 [osx-64, win-64]"
             "title": get_title(name, __("version"), __("subdirs")),
-            "description": coalesce(
-                "description", "summary", default="No description."
-            ),
+            "description": coalesce("description", "summary"),
             "link": __("doc_url"),  # URI - project or project docs
             "comments": __("dev_url"),  # URI
             "guid": __("source_url"),  # URI - download link
