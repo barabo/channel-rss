@@ -54,11 +54,7 @@ class Downloader:
                 threading.Thread(
                     target=cls.download,
                     name=f"DownloadWorker({channel})",
-                    args=(
-                        channel,
-                        notifier,
-                        inflight,
-                    ),
+                    args=(channel, notifier, inflight,),
                 ).start()
 
             # Defer downloads while the next scheduled is in the future.
@@ -90,7 +86,7 @@ class Downloader:
 
             # Download the file.
             with open(new_download, "wb") as local:
-                shutil.copyfileobj(upstream.raw, local, length=2**24)  # 16MB
+                shutil.copyfileobj(upstream.raw, local, length=2 ** 24)  # 16MB
 
             # Quit early if the downloaded file is not new or is not needed.
             if (
@@ -104,7 +100,7 @@ class Downloader:
             # Update channeldata!
             result["inflate_start"] = time.time()
             with gzip.open(new_download, "rt") as src, open(inflated, "w") as dest:
-                shutil.copyfileobj(src, dest, length=2**24)  # 16MB
+                shutil.copyfileobj(src, dest, length=2 ** 24)  # 16MB
             result["inflate_complete"] = time.time()
 
             # Replace the old channeldata with the new.
@@ -152,12 +148,7 @@ class Downloader:
         else:
             log.debug(f"will refresh in {upcoming} seconds")
 
-        cls._schedule.put(
-            (
-                timestamp,
-                {"args": (channel, notifier)},
-            )
-        )
+        cls._schedule.put((timestamp, {"args": (channel, notifier)},))
 
     @classmethod
     def _get_response_details(cls, response):
@@ -179,10 +170,6 @@ class Downloader:
             selected["request"] = {
                 key: selected["request"].__dict__[key]
                 for key in selected["request"].__dict__.keys()
-                & {
-                    "method",
-                    "url",
-                    "headers",
-                }
+                & {"method", "url", "headers",}
             }
         return selected
