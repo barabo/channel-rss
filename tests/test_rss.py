@@ -3,7 +3,7 @@ import time
 
 import rss
 
-DAY = 24 * 60 * 60
+_DAY = 24 * 60 * 60
 
 
 class rssTest(unittest.TestCase):
@@ -23,7 +23,7 @@ class rssTest(unittest.TestCase):
                     "source_url": "http://example1.org/package_sources.zip/download",
                     "subdirs": ["win-32", "win-64"],
                     "summary": "Short description",
-                    "timestamp": rss.time.time() - 1 * DAY,
+                    "timestamp": rss.time.time() - 1 * _DAY,
                     "version": "123",
                 },
                 "example2": {
@@ -37,7 +37,7 @@ class rssTest(unittest.TestCase):
                     "source_url": "http://example2.com/src.tar.gz",
                     "subdirs": ["win-32", "osx-64", "osx-64", "linux-64"],
                     "summary": "Short description",
-                    "timestamp": rss.time.time() - 3 * DAY,
+                    "timestamp": rss.time.time() - 3 * _DAY,
                     "version": "1.2.3.4",
                 },
             },
@@ -53,7 +53,7 @@ class rssTest(unittest.TestCase):
                     "source_url": "http://example1.org/package_sources.zip/download",
                     "subdirs": ["win-32", "win-64"],
                     "summary": "Short description",
-                    "timestamp": rss.time.time() - 14 * DAY,
+                    "timestamp": rss.time.time() - 14 * _DAY,
                     "version": "123",
                 },
             },
@@ -70,24 +70,26 @@ class rssTest(unittest.TestCase):
 
     def testGetChannel(self):
         packages = rss.get_recent_packages(self.channeldata, 2)
-        actual = rss.get_channel("example", packages, 2)
+        actual = rss._get_channel("example", packages, 2)
         expected = {
             "title": "anaconda.org/example",
             "link": "https://conda.anaconda.org/example",
             "description": "An anaconda.org community with 1 package updates in the past 2 days.",
-            "pubDate": rss.iso822(time.time()),
-            "lastBuildDate": rss.iso822(time.time()),
+            "pubDate": rss._iso822(time.time()),
+            "lastBuildDate": rss._iso822(time.time()),
         }
         self.assertDictEqual(actual, expected)
 
     def testGetTitle(self):
-        actual = rss.get_title("example2", "213", ["win-32", "linux-s390x"])
+        actual = rss._get_title("example2", "213", ["win-32", "linux-s390x"])
         expected = "example2 213 [linux-s390x, win-32]"
         self.assertEqual(actual, expected)
 
     def testIso822(self):
-        self.assertEqual(rss.iso822(0), "Thu, 01 Jan 1970 00:00:00 GMT")
-        self.assertEqual(rss.iso822(1656717698.601216), "Fri, 01 Jul 2022 23:21:38 GMT")
+        self.assertEqual(rss._iso822(0), "Thu, 01 Jan 1970 00:00:00 GMT")
+        self.assertEqual(
+            rss._iso822(1656717698.601216), "Fri, 01 Jul 2022 23:21:38 GMT"
+        )
 
     def testGetItems(self):
         packages = [
@@ -103,12 +105,12 @@ class rssTest(unittest.TestCase):
                     "source_url": "http://example1.org/package_sources.zip/download",
                     "subdirs": ["win-32", "win-64"],
                     "summary": "Short description",
-                    "timestamp": time.time() - 1 * DAY,
+                    "timestamp": time.time() - 1 * _DAY,
                     "version": "123",
                 }
             }
         ]
-        actual = rss.get_items(packages)
+        actual = rss._get_items(packages)
         expected = [
             {
                 "title": "example1 123 [win-32, win-64]",

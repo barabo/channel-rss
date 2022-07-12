@@ -24,25 +24,25 @@ def get_recent_packages(channeldata, threshold_days):
     )
 
 
-def iso822(timestamp):
+def _iso822(timestamp):
     return time.strftime("%a, %d %b %Y %T GMT", time.gmtime(timestamp))
 
 
-def get_channel(channel_name, packages, threshold_days):
+def _get_channel(channel_name, packages, threshold_days):
     return {
         "title": f"anaconda.org/{channel_name}",
         "link": f"https://conda.anaconda.org/{channel_name}",
         "description": f"An anaconda.org community with {len(packages)} package updates in the past {threshold_days} days.",
-        "pubDate": iso822(time.time()),
-        "lastBuildDate": iso822(time.time()),
+        "pubDate": _iso822(time.time()),
+        "lastBuildDate": _iso822(time.time()),
     }
 
 
-def get_title(name, version, subdirs):
+def _get_title(name, version, subdirs):
     return f"{name} {version} [{', '.join(sorted({x for x in subdirs}))}]"
 
 
-def get_items(packages):
+def _get_items(packages):
 
     items = []
     for name, package in [tuple(p.items())[0] for p in packages]:
@@ -55,12 +55,12 @@ def get_items(packages):
 
         item = {
             # Example: "7zip 19.00 [osx-64, win-64]"
-            "title": get_title(name, __("version"), __("subdirs")),
+            "title": _get_title(name, __("version"), __("subdirs")),
             "description": coalesce("description", "summary"),
             "link": __("doc_url"),  # URI - project or project docs
             "comments": __("dev_url"),  # URI
             "guid": __("source_url"),  # URI - download link
-            "pubDate": iso822(__("timestamp")),
+            "pubDate": _iso822(__("timestamp")),
             "source": __("home"),  # URI
         }
         empty_fields = [k for k, v in item.items() if not v]
@@ -82,9 +82,9 @@ def get_rss(channel_name, channeldata, threshold_days):
     packages = get_recent_packages(channeldata, threshold_days)
 
     channel = newdoc.createElement("channel")
-    append_strings(channel, get_channel(channel_name, packages, threshold_days))
+    append_strings(channel, _get_channel(channel_name, packages, threshold_days))
 
-    for package in get_items(packages):
+    for package in _get_items(packages):
         item = newdoc.createElement("item")
         append_strings(item, package)
         channel.appendChild(item)
