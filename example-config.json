@@ -10,7 +10,11 @@
         },
         "conda-forge": {
             "cadence": 600,
-            "days_old": 14
+            "days_old": 3
+        },
+        "r": {
+            "cadence": 3600,
+            "days_old": 30
         }
     }
 }
